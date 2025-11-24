@@ -3,75 +3,97 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const CustomerData = () => {
-  const navigate=useNavigate()
-
+  const navigate = useNavigate();
   const [customers, setCustomers] = useState([]);
   const [error, setError] = useState("");
+  const [success, SetSuccess] = useState("");
 
-  // Fetch customers on mount
   useEffect(() => {
-  const fetchCustomers = async () => {
-    try {
-      const result = await axios.get("http://localhost:4000/api/customers");
+    const fetchCustomers = async () => {
+      try {
+        const result = await axios.get("http://localhost:4000/api/TaskManager");
 
-      if(result.data.success) {
-        setCustomers(result.data.data);
-      } else {
+        if (result.data.success) {
+          setCustomers(result.data.data);
+        } else {
+          setCustomers([]);
+          setError(result.data.message || "No customers found");
+        }
+      } catch (err) {
+        console.error(err);
         setCustomers([]);
-        setError(result.data.message || "No customers found");
+        setError("Failed to fetch customers");
       }
-    } catch (err) {
-      console.error(err);
-      setCustomers([]);
-      setError("Failed to fetch customers");
-    }
-  };
+    };
 
-  fetchCustomers();
-}, []);
+    fetchCustomers();
+  }, []);
 
-
-  const updateData = (customerId) => {
-    console.log("Update Data for", customerId);
-    navigate(`/updateData/${id}`)
+  const updateData = (customer) => {
+    navigate(`/updateData/${customer}`);
   };
 
   const deleteData = async (customerId) => {
     try {
-      await axios.delete(`http://localhost:4000/api/customers/${customerId}`);
-      // Remove deleted customer from state
-      setCustomers(customers.filter(c => c._id !== customerId));
+      await axios.delete(`http://localhost:4000/api/TaskManager/${customerId}`);
+      setCustomers(customers.filter((c) => c._id !== customerId));
     } catch (err) {
       console.error(err);
       setError("Failed to delete customer");
     }
   };
 
+  const deleteAllData = async () => {
+    try {
+      await axios.delete("http://localhost:4000/api/TaskManager/Customer/deleteAll");
+      setCustomers([]);
+      SetSuccess("Deleted All Task")
+    } catch (error) {
+      console.log(error);
+      setError("Failed to delete all");
+    }
+  };
+
   return (
-    <div>
+    <>
+
+    <div className="text-center">
       {error && (
-        <div className="text-red-600 text-center text-lg mb-3 font-semibold">
+        <div className="text-red-600 text-lg mb-3 font-semibold mt-10">
           {error}
         </div>
       )}
-      <div className="overflow-x-auto bg-white shadow-lg rounded-2xl p-6 w-full">
-        <table className="table w-full">
+      {success && (
+        <div className="text-green-600 text-lg mb-3 font-semibold mt-10">
+          {success}
+        </div>
+      )}
+      </div>
+    <div className="flex justify-center">
+      <div className="overflow-x-auto bg-white shadow-lg rounded-2xl p-6 w-5xl mt-5">
+        <div className="flex justify-end">
+        <button 
+          onClick={deleteAllData}
+          className="bg-red-600 text-white px-4 py-2 rounded mb-4"
+        >
+          Delete All
+        </button>
+        </div>
+
+        <table className="table">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Email ID</th>
-              <th>Phone Number</th>
-              <th>Address</th>
+              <th>Title</th>
+              <th>Description</th>
               <th className="text-center">Action</th>
             </tr>
           </thead>
+
           <tbody>
             {customers.map((customer) => (
               <tr key={customer._id}>
-                <td>{customer.name}</td>
-                <td>{customer.email}</td>
-                <td>{customer.phone}</td>
-                <td>{customer.address}</td>
+                <td>{customer.title}</td>
+                <td>{customer.description}</td>
                 <td className="p-3 flex justify-evenly">
                   <button
                     onClick={() => updateData(customer._id)}
@@ -79,6 +101,7 @@ const CustomerData = () => {
                   >
                     Edit
                   </button>
+
                   <button
                     onClick={() => deleteData(customer._id)}
                     className="bg-red-500 px-4 py-2 text-white rounded text-lg font-bold cursor-pointer"
@@ -88,9 +111,10 @@ const CustomerData = () => {
                 </td>
               </tr>
             ))}
+
             {customers.length === 0 && (
               <tr>
-                <td colSpan="5" className="text-center text-gray-500 py-4">
+                <td colSpan="3" className="text-center text-gray-500 py-4">
                   No customers found.
                 </td>
               </tr>
@@ -99,9 +123,8 @@ const CustomerData = () => {
         </table>
       </div>
     </div>
+    </>
   );
 };
 
 export default CustomerData;
-
-

@@ -1,126 +1,90 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import { useParams, useNavigate } from "react-router-dom";
 
 const UpdateCustomer = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [customer, setCustomer] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    address: "",
-  });
-
-  const [loading, setLoading] = useState(true);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  // Fetch customer data
   useEffect(() => {
     const fetchCustomer = async () => {
-      if (!id) {
-        setError("Invalid customer ID");
-        setLoading(false);
-        return;
-      }
-
       try {
-        const res = await axios.get(`http://localhost:4000/api/customers/${id}`);
-
-        console.log("API Response:", res.data);
-
-        const data = res.data.data || res.data.customer || res.data;
-
-        setCustomer({
-          name: data.name || "",
-          email: data.email || "",
-          phone: data.phone || "",
-          address: data.address || "",
-        });
+        const res = await axios.get(`http://localhost:4000/api/TaskManager/update/${id}`);
+        if (res.data.success) {
+          setTitle(res.data.data.title);
+          setDescription(res.data.data.description);
+        } else {
+          setError(res.data.message || "Customer not found");
+        }
       } catch (err) {
-        console.error("Fetch error:", err);
-        setError("Failed to load customer data");
-      } finally {
-        setLoading(false);
+        console.error(err);
+        setError("Failed to fetch customer");
       }
     };
-
     fetchCustomer();
   }, [id]);
 
-  const handleChange = (e) => {
-    setCustomer({ ...customer, [e.target.name]: e.target.value });
-  };
-
+  // Submit update
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validation
+    if (!title.trim() || !description.trim()) {
+      setError("Please fill in all fields");
+      setSuccess("");
+      return;
+    }
+
     try {
-      const res = await axios.patch(
-        `http://localhost:4000/api/customers/${id}`,
-        customer
-      );
+      const res = await axios.put(`http://localhost:4000/api/TaskManager/update/${id}`, {
+        title,
+        description,
+      });
 
       if (res.data.success) {
-        setSuccess("Customer updated successfully!");
-        setTimeout(() => navigate("/customers"), 1200);
+        setSuccess(res.data.message);
+        setError("");
+        setTimeout(() => navigate("/Customer"), 1500); // redirect after success
+      } else {
+        setError(res.data.message || "Update failed");
+        setSuccess("");
       }
     } catch (err) {
       console.error(err);
-      setError("Failed to update customer");
+      setError(err.response?.data?.message || "Failed to update customer");
+      setSuccess("");
     }
   };
 
-  if (loading) {
-    return <p className="text-center mt-10 text-gray-600">Loading...</p>;
-  }
-
   return (
-    <div className="max-w-md mx-auto mt-12 bg-white p-6 shadow-lg rounded-xl">
-      <h1 className="text-2xl font-bold text-center mb-6">Update Customer</h1>
+    <div className="flex justify-center mt-10">
+      <form onSubmit={handleSubmit} className="bg-white p-6 shadow rounded w-96 space-y-4">
+        {error && <div className="text-red-600 font-semibold">{error}</div>}
+        {success && <div className="text-green-600 font-semibold">{success}</div>}
 
-      {error && <p className="text-red-600 text-center mb-4">{error}</p>}
-      {success && <p className="text-green-600 text-center mb-4">{success}</p>}
-
-      <form onSubmit={handleSubmit} className="space-y-4">
         <input
-          name="name"
-          value={customer.name}
-          onChange={handleChange}
-          placeholder="Full Name"
+          type="text"
+          placeholder="Title"
           className="w-full border p-2 rounded"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
         />
 
         <input
-          name="email"
-          type="email"
-          value={customer.email}
-          onChange={handleChange}
-          placeholder="Email Address"
+          type="text"
+          placeholder="Description"
           className="w-full border p-2 rounded"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
         />
 
-        <input
-          name="phone"
-          value={customer.phone}
-          onChange={handleChange}
-          placeholder="Phone Number"
-          className="w-full border p-2 rounded"
-        />
-
-        <input
-          name="address"
-          value={customer.address}
-          onChange={handleChange}
-          placeholder="Home Address"
-          className="w-full border p-2 rounded"
-        />
-
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-2 font-semibold rounded hover:bg-blue-700"
-        >
+        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded w-full">
           Update Customer
         </button>
       </form>

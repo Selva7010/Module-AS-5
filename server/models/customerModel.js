@@ -2,12 +2,11 @@
 import mongoose from "mongoose";
 
 const customerSchema = new mongoose.Schema({
-    name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    phone: { type: String, required: true },
-    address: { type: String, default: "" },
-}, { timestamps: true });
+    title: { type: String, required: true },
+    description: { type: String, required: true },
+    
+});
 
-const Customer = mongoose.models.Customer || mongoose.model("Customer", customerSchema);
+const TaskManager = mongoose.models.TaskManager || mongoose.model("TaskManager", customerSchema);
 
-export default Customer;
+export default TaskManager;

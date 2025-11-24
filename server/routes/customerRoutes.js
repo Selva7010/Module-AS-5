@@ -5,7 +5,8 @@ import {
     getCustomers,
     getCustomerById,
     updateCustomer,
-    deleteCustomer
+    deleteCustomer,
+    deleteAllTask
 } from "../controllers/customerController.js";
 
 const router = express.Router();
@@ -14,7 +15,8 @@ const router = express.Router();
 router.post("/", createCustomer);         
 router.get("/", getCustomers);           
 router.get("/:id", getCustomerById);     
-router.patch("/:id", updateCustomer);     
-router.delete("/:id", deleteCustomer);    
+router.patch("/update/:id", updateCustomer);     
+router.delete("/:id", deleteCustomer);  
+router.delete("/Customer/deleteAll", deleteAllTask);  
 
 export default router;

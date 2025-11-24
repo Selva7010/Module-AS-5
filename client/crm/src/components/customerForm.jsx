@@ -1,107 +1,51 @@
-// import React, { useState } from 'react';
-// import axios from "axios";
-
-// const CustomerForm = () => {
-//     const [name, setName]=useState("")
-//     const [email, setEmail]=useState("")
-//     const [phone, setPhone]=useState("")
-//     const[address, setAddress]=useState("")
-//     const [customerErr, setCustomerErr] = useState("");
-//     const [success, setSuccess] = useState("");
-
-//     const submitHandler=async (e)=>{
-//       e.preventDefault()
-//       console.log({name, email, phone, address})
-
-
-//       try {
-//       const result = await axios.post(
-//         "http://localhost:4000/api/customers",
-//         { name, email, phone, address }
-//       );
-
-//       if (result.data.success) {
-//         setSuccess(result.data.message);
-//         setCustomerErr("");
-        
-//       } 
-//       else {
-//         setCustomerErr(result.data.message);
-//         setSuccess("");
-        
-        
-//       }
-
-//     } catch (err) {
-//       console.error(err);
-//       setLoginError("Login Failed. Server Error");
-//     }
-
-//     }
-
-//     return (
-//         <div>
-//             {customerErr && (<div className="text-red-600 text-center text-lg mb-3 font-semibold">{customerErr}</div>)}
-//            {success && (<div className="text-green-600 text-center text-lg mb-3 font-semibold">{success}</div>)}
-//         <form onSubmit={submitHandler} className="bg-white p-4 shadow rounded space-y-2">
-//             <input className="w-full border p-2 rounded mt-2" type="text" placeholder="Name" name='name' value={name} onChange={(e) => setName(e.target.value)} />
-//             <input className="w-full border p-2 rounded mt-2" type="email" placeholder="Email" name='email' value={email} onChange={(e) => setEmail(e.target.value)} />
-//             <input className="w-full border p-2 rounded mt-2" type="text" placeholder="Phone" name='phone' value={phone} onChange={(e) => setPhone(e.target.value)} />
-//             <input className="w-full border p-2 rounded mt-2" type="text" placeholder="address" name='address' value={address} onChange={(e) => setAddress(e.target.value)} />
-//             <button className="bg-blue-600 text-white px-4 py-2 rounded mt-2" type="submit">Add Customer</button>
-//         </form>
-//         </div>
-//     );
-// };
-
-// export default CustomerForm;
 
 
 import React, { useState } from "react";
 import axios from "axios";
 
 const CustomerForm = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
-  const [customerErr, setCustomerErr] = useState("");
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [taskError, setTaskError] = useState("");
   const [success, setSuccess] = useState("");
 
   const submitHandler = async (e) => {
     e.preventDefault();
-    console.log({ name, email, phone, address });
+
+    // Basic validation
+    if (!title.trim() || !description.trim()) {
+      setTaskError("Please fill in all fields");
+      setSuccess("");
+      return;
+    }
 
     try {
       const result = await axios.post(
-        "http://localhost:4000/api/customers",
-        { name, email, phone, address }
+        "http://localhost:4000/api/TaskManager",
+        { title, description }
       );
 
       if (result.data.success) {
         setSuccess(result.data.message);
-        setCustomerErr("");
-        // Optional: clear form
-        setName("");
-        setEmail("");
-        setPhone("");
-        setAddress("");
+        setTaskError("");
+        setTitle("");
+        setDescription("");
       } else {
-        setCustomerErr(result.data.message);
+        setTaskError(result.data.message);
         setSuccess("");
       }
     } catch (err) {
       console.error(err);
-      setCustomerErr("Failed to add customer. Server Error");
+      setTaskError("Failed to add Task. Server Error");
       setSuccess("");
     }
   };
 
   return (
     <div>
-      {customerErr && (
+      {taskError && (
         <div className="text-red-600 text-center text-lg mb-3 font-semibold">
-          {customerErr}
+          {taskError}
         </div>
       )}
       {success && (
@@ -109,6 +53,7 @@ const CustomerForm = () => {
           {success}
         </div>
       )}
+
       <form
         onSubmit={submitHandler}
         className="bg-white p-4 shadow rounded space-y-2"
@@ -116,40 +61,26 @@ const CustomerForm = () => {
         <input
           className="w-full border p-2 rounded mt-2"
           type="text"
-          placeholder="Name"
-          name="name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          placeholder="Title"
+          name="title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
         />
-        <input
-          className="w-full border p-2 rounded mt-2"
-          type="email"
-          placeholder="Email"
-          name="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+
         <input
           className="w-full border p-2 rounded mt-2"
           type="text"
-          placeholder="Phone"
-          name="phone"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
+          placeholder="Description"
+          name="description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
         />
-        <input
-          className="w-full border p-2 rounded mt-2"
-          type="text"
-          placeholder="Address"
-          name="address"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-        />
+
         <button
           className="bg-blue-600 text-white px-4 py-2 rounded mt-2"
           type="submit"
         >
-          Add Customer
+          Add Task
         </button>
       </form>
     </div>

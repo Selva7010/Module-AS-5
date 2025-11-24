@@ -23,7 +23,7 @@ app.use(cors({
 
 // ROUTES
 app.use('/api/auth', authRouter)
-app.use("/api/customers", router)
+app.use("/api/TaskManager", router)
 
 app.get('/', (req, res) => res.send('API Working'))
 
